@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+require("dotenv").config();
+console.log("🔍 MONGO_URI:", process.env.MONGO_URI); // Отладка
+
 const app = express();
 app.use(express.json());
 app.use(cors());
