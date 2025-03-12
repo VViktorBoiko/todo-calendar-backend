@@ -3,22 +3,29 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-console.log("🔍 Проверка MONGO_URI (не отображается для безопасности)");
+console.log("🔍 Проверка переменной MONGO_URI:", process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-
-// ✅ Подключение к MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB connected"))
-    .catch(err => console.error("❌ MongoDB connection error:", err));
-
-// ✅ Проверка работы API
+// ✅ Маршрут для проверки, работает ли сервер
 app.get("/", (req, res) => {
     res.send("✅ API is running...");
 });
+
+// ✅ Подключение к MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => {
+        console.log("✅ MongoDB connected");
+
+        // ✅ Запускаем сервер после подключения к MongoDB
+        app.listen(PORT, "0.0.0.0", () => console.log(`✅ Server running on http://localhost:${PORT}`));
+    })
+    .catch(err => {
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1); // Завершаем процесс при ошибке
+    });
 
 // ✅ Схема и модель для задач
 const TaskSchema = new mongoose.Schema({
@@ -81,4 +88,9 @@ app.delete("/tasks/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => console.log(`✅ Server running on http://localhost:${PORT}`));
+
+app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+}).on("error", (err) => {
+    console.error("❌ Server error:", err);
+});
