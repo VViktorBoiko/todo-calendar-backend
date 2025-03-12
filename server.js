@@ -3,12 +3,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-require("dotenv").config();
 console.log("🔍 Проверка переменной MONGO_URI:", process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+const PORT = process.env.PORT || 3000;
 
 // ✅ Маршрут для проверки, работает ли сервер
 app.get("/", (req, res) => {
@@ -20,8 +21,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => {
         console.log("✅ MongoDB connected");
 
-        // ✅ Запускаем сервер ТОЛЬКО после успешного подключения к базе
-        const PORT = process.env.PORT || 3000;
+        // ✅ Запускаем сервер после подключения к MongoDB
         app.listen(PORT, "0.0.0.0", () => console.log(`✅ Server running on http://localhost:${PORT}`));
     })
     .catch(err => {
@@ -44,6 +44,7 @@ app.get("/tasks", async (req, res) => {
         const tasks = await Task.find(date ? { date } : {});
         res.json(tasks);
     } catch (error) {
+        console.error("❌ Ошибка при получении задач:", error);
         res.status(500).json({ message: "Ошибка при получении задач", error });
     }
 });
@@ -55,6 +56,7 @@ app.post("/tasks", async (req, res) => {
         await task.save();
         res.status(201).json(task);
     } catch (error) {
+        console.error("❌ Ошибка при добавлении задачи:", error);
         res.status(500).json({ message: "Ошибка при добавлении задачи", error });
     }
 });
@@ -69,6 +71,7 @@ app.put("/tasks/:id/toggle", async (req, res) => {
         await task.save();
         res.json(task);
     } catch (error) {
+        console.error("❌ Ошибка при обновлении задачи:", error);
         res.status(500).json({ message: "Ошибка при обновлении задачи", error });
     }
 });
@@ -81,6 +84,7 @@ app.delete("/tasks/:id", async (req, res) => {
 
         res.json({ message: "Задача удалена", deletedTask });
     } catch (error) {
+        console.error("❌ Ошибка при удалении задачи:", error);
         res.status(500).json({ message: "Ошибка при удалении задачи", error });
     }
 });
